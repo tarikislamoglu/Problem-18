@@ -25,40 +25,46 @@ export default function InputChanges() {
   const [count, setCount] = useState(0);
   const [maxValueLength, setMaxValueLength] = useState(false);
   const [inputBg, setInputBg] = useState("bg-white");
-  const [fastTypeWarning, setFastTypeWarning] = useState(false);
-  const [typeTime, setTypeTime] = useState(Date.now());
+  const [changeTimes, setChangeTimes] = useState([]);
+
   useEffect(() => {
     if (value !== "") {
       setCount((c) => c + 1);
     }
   }, [value]);
+
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (Date.now() - typeTime < 3000 && count >= 5) {
-        setFastTypeWarning(true);
-      } else {
-        setFastTypeWarning(false);
+    if (changeTimes.length >= 5) {
+      const timeDiff = Date.now() - changeTimes[changeTimes.length - 5];
+      if (timeDiff < 3000) {
+        alert("Çok hızlı değişiklik yaptınız!");
+        setChangeTimes([]);
       }
-    }, 100);
-    return () => clearInterval(intervalId);
-  }, [count, typeTime]);
+    }
+  }, [changeTimes]);
 
   function onChange(event) {
     const value = event.target.value;
+
     setValue(value);
+
     console.log(value);
+
     if (value.length >= 10) {
       alert("Max değişiklik sayısına ulaştınız");
       setMaxValueLength(true);
     }
+
     if (value) {
       setInputBg("bg-sky-100");
       setTimeout(() => {
         setInputBg("bg-white");
       }, 1000);
     }
-    setTypeTime(Date.now());
+
+    setChangeTimes((prev) => [...prev, Date.now()]);
   }
+
   const handleResetClick = () => {
     setValue("");
     setCount(0);
@@ -102,15 +108,6 @@ export default function InputChanges() {
           {count === 0 ? "Hiç değişiklik yapılmadı" : "Değişlik yapıldı"}
         </p>
       }
-      {fastTypeWarning && (
-        <p
-          className={` text-white p-1 rounded-md mt-2  sm:w-2/3 w-full ${
-            count === 0 ? "bg-red-500" : "bg-green-500"
-          }`}
-        >
-          Çok hızlı değişiklik yapıyorsunuz!
-        </p>
-      )}
     </div>
   );
 }
